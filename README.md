@@ -16,10 +16,10 @@ end
 db_path = "/usr/share/GeoIP/GeoIPCity.dat"
 host = "www.google.com"
 
-geoip = GeoIP.new db_path, host
+geoip = GeoIP.new db_path
 
 # You can use record_by_addr when using IP address into host
-geoip.record_by_name
+geoip.record_by_name host
 
 geoip.country_code        #=> "US"
 geoip.region              #=> "CA"
