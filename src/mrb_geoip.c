@@ -88,7 +88,8 @@ static mrb_value mrb_geoip_record_by_addr(mrb_state *mrb, mrb_value self)
   char *addr;
 
   if (data->gir != NULL) {
-    mrb_raise(mrb, E_RUNTIME_ERROR, "GeoIP record already exits");
+    GeoIPRecord_delete(data->gir);
+    data->gir = NULL;
   }
   mrb_get_args(mrb, "z", &addr);
   data->host = addr;
