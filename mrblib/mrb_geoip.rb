@@ -1,0 +1,2 @@
+class GeoIP
+end
