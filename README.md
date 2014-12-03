@@ -21,8 +21,16 @@ geoip = GeoIP.new db_path, host
 # You can use record_by_addr when using IP address into host
 geoip.record_by_name
 
-geoip.country_code #=> US
-geoip.region #=> CA
+geoip.country_code        #=> "US"
+geoip.region              #=> "CA"
+geoip.region_name         #=> "California"
+geoip.city                #=> "Mountain View"
+geoip.postal_code         #=> "94043"
+geoip.latitude.round(4)   #=> 37.4192
+geoip.longitude.round(4)  #=> -122.0574
+geoip.metro_code          #=> 807
+geoip.area_code           #=> 650
+geoip.time_zone           #=> "America/Los_Angeles"
 ```
 
 ## License
