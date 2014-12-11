@@ -5,7 +5,7 @@ compiler:
 before_install:
   - sudo apt-get -qq update
 install:
-  - sudo apt-get -qq install rake bison git gperf geoip-database
+  - sudo apt-get -qq install rake bison git gperf geoip-database libgeoip-dev
   - sudo wget -N http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
   - sudo gunzip GeoLiteCity.dat.gz
   - sudo mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
