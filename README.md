@@ -1,5 +1,5 @@
 # mruby-geoip   [![Build Status](https://travis-ci.org/matsumoto-r/mruby-geoip.png?branch=master)](https://travis-ci.org/matsumoto-r/mruby-geoip)
-GeoIP(City) class for mruby
+GeoIPCity class using [GeoIPCity.dat](http://dev.maxmind.com/geoip/legacy/install/city/) for mruby
 ## install by mrbgems
 - add conf.gem line to `build_config.rb`
 
