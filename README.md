@@ -8,7 +8,7 @@ MRuby::Build.new do |conf|
 
     # ... (snip) ...
 
-    conf.gem :git => 'https://github.com/matsumoto-r/mruby-geoip.git'
+    conf.gem :github => 'matsumoto-r/mruby-geoip'
 end
 ```
 ## example
