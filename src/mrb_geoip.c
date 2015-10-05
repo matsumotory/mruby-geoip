@@ -37,8 +37,11 @@ static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
 {
   mrb_geoip_data *data = (mrb_geoip_data *)DATA_PTR(self);
 
-  GeoIPRecord_delete(data->gir);
-  GeoIP_delete(data->gi);
+  if (data->gir != NULL)
+    GeoIPRecord_delete(data->gir);
+  if (data->gi != NULL)
+    GeoIP_delete(data->gi);
+
   mrb_free(mrb, data);
 
   return mrb_nil_value();
