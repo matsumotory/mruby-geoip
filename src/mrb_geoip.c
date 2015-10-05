@@ -33,6 +33,17 @@ static void mrb_geoip_free(mrb_state *mrb, void *p)
   GeoIP_delete(data->gi);
 }
 
+static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
+{
+  mrb_geoip_data *data = (mrb_geoip_data *)DATA_PTR(self);
+
+  GeoIPRecord_delete(data->gir);
+  GeoIP_delete(data->gi);
+  mrb_free(mrb, data);
+
+  return mrb_nil_value();
+}
+
 static const struct mrb_data_type mrb_geoip_data_type = {
   "mrb_geoip_data", mrb_geoip_free,
 };
@@ -220,6 +231,7 @@ void mrb_mruby_geoip_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, geoip, "metro_code", mrb_geoip_metro_code, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "area_code", mrb_geoip_area_code, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "time_zone", mrb_geoip_time_zone, MRB_ARGS_NONE());
+    mrb_define_method(mrb, geoip, "close", mrb_geoip_close, MRB_ARGS_NONE());
     DONE;
 }
 
