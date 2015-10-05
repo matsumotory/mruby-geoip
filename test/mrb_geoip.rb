@@ -81,3 +81,9 @@ assert("GeoIP#time_zone") do
   assert_equal("America/Los_Angeles", geoip.time_zone)
 end
 
+assert("GeoIP#close") do
+  geoip = GeoIP.new GeoIPdat
+
+  assert_equal(nil, geoip.close)
+end
+
