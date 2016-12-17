@@ -58,6 +58,7 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
   mrb_geoip_data *data;
   char *city_db;
   char *isp_db;
+  int argc;
 
   data = (mrb_geoip_data *)DATA_PTR(self);
   if (data) {
@@ -66,7 +67,7 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
   DATA_TYPE(self) = &mrb_geoip_data_type;
   DATA_PTR(self) = NULL;
 
-  int argc = mrb_get_args(mrb, "z|z", &city_db, &isp_db);
+  mrb_get_args(mrb, "z|z", &city_db, &isp_db);
   data = (mrb_geoip_data *)mrb_malloc(mrb, sizeof(mrb_geoip_data));
   data->city_db = city_db;
   data->host = NULL;
