@@ -2,8 +2,11 @@
 ## GeoIP Test
 ##
 
-GeoIPdat = "/usr/share/GeoIP/GeoIPCity.dat"
-GeoIPhost = "www.google.com"
+GeoIPdat = '/usr/local/share/GeoLiteCity.dat'
+GeoIPhost = 'www.google.com'
+
+# from: https://github.com/maxmind/geoip-api-php/blob/master/tests/data/GeoIPOrg.dat
+GeoIPIspdat = '/usr/local/share/GeoIPOrg.dat'
 
 assert("GeoIP#new") do
   geoip = GeoIP.new GeoIPdat
@@ -46,6 +49,13 @@ assert("GeoIP#postal_code") do
   assert_equal("94043", geoip.postal_code)
 end
 
+assert("GeoIP#org") do
+  geoip = GeoIP.new(GeoIPdat, GeoIPIspdat)
+  geoip.record_by_addr '64.17.254.216'
+
+  assert_equal('Karlin Peebles LLP', geoip.org)
+end
+
 assert("GeoIP#latitude") do
   geoip = GeoIP.new GeoIPdat
   geoip.record_by_name GeoIPhost
@@ -86,4 +96,3 @@ assert("GeoIP#close") do
 
   assert_equal(nil, geoip.close)
 end
-
