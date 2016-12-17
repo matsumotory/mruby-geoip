@@ -19,4 +19,4 @@ RUN wget -P /usr/local/share/ http://geolite.maxmind.com/download/geoip/database
 ENV LD_LIBRARY_PATH /usr/lib
 ADD . /tmp/mruby-geoip
 WORKDIR /tmp/mruby-geoip
-CMD cp .travis_build_config.rb build_config.rb && rake test
+CMD rake test
