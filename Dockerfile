@@ -17,4 +17,6 @@ RUN wget -P /usr/local/share/ https://raw.githubusercontent.com/maxmind/geoip-ap
 RUN wget -P /usr/local/share/ http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz \
     && gunzip /usr/local/share/GeoLiteCity.dat.gz
 ENV LD_LIBRARY_PATH /usr/lib
-CMD rake test
+ADD . /tmp/mruby-geoip
+WORKDIR /tmp/mruby-geoip
+CMD cp .travis_build_config.rb build_config.rb && rake test
