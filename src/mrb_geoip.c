@@ -16,9 +16,11 @@
 
 typedef struct {
   GeoIP *gi;
+  GeoIP *isp_gi;
   GeoIPRecord *gir;
-  char *db;
+  char *city_db;
   char *host;
+  char *(*org_function)(GeoIP *gi, const char *host);
 } mrb_geoip_data;
 
 static const char *MK_STR(const char *str){
@@ -54,7 +56,9 @@ static const struct mrb_data_type mrb_geoip_data_type = {
 static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
 {
   mrb_geoip_data *data;
-  char *db;
+  char *city_db;
+  char *isp_db;
+  int argc;
 
   data = (mrb_geoip_data *)DATA_PTR(self);
   if (data) {
@@ -63,14 +67,23 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
   DATA_TYPE(self) = &mrb_geoip_data_type;
   DATA_PTR(self) = NULL;
 
-  mrb_get_args(mrb, "z", &db);
+  argc = mrb_get_args(mrb, "z|z", &city_db, &isp_db);
   data = (mrb_geoip_data *)mrb_malloc(mrb, sizeof(mrb_geoip_data));
-  data->db = db;
+  data->city_db = city_db;
   data->host = NULL;
-  data->gi = GeoIP_open(db, GEOIP_INDEX_CACHE);
+
+  data->gi = GeoIP_open(city_db, GEOIP_INDEX_CACHE);
   if (data->gi == NULL) {
     mrb_raise(mrb, E_RUNTIME_ERROR, "GeoIP database open fail");
   }
+
+  if (argc == 2) {
+    data->isp_gi = GeoIP_open(isp_db, GEOIP_INDEX_CACHE);
+    if (data->isp_gi == NULL) {
+      mrb_raise(mrb, E_RUNTIME_ERROR, "GeoIP ISP database open fail");
+    }
+  }
+
   data->gir = NULL;
   DATA_PTR(self) = data;
 
@@ -93,6 +106,7 @@ static mrb_value mrb_geoip_record_by_name(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_RUNTIME_ERROR, "not found GeoIP record for hostanme");
   }
 
+  data->org_function = GeoIP_org_by_name;
   return self;
 }
 
@@ -112,6 +126,7 @@ static mrb_value mrb_geoip_record_by_addr(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_RUNTIME_ERROR, "not found GeoIP record for IP address");
   }
 
+  data->org_function = GeoIP_org_by_addr;
   return self;
 }
 
@@ -164,6 +179,14 @@ static mrb_value mrb_geoip_postal_code(mrb_state *mrb, mrb_value self)
        " call record_by_name or record_by_addr method");
   }
   return mrb_str_new_cstr(mrb, MK_STR(data->gir->postal_code));
+}
+
+static mrb_value mrb_geoip_org(mrb_state *mrb, mrb_value self)
+{
+  mrb_geoip_data *data = DATA_PTR(self);
+  return mrb_str_new_cstr(mrb, MK_STR(data->org_function(
+          data->isp_gi, data->host)));
+
 }
 
 static mrb_value mrb_geoip_latitude(mrb_state *mrb, mrb_value self)
@@ -221,7 +244,7 @@ void mrb_mruby_geoip_gem_init(mrb_state *mrb)
 {
     struct RClass *geoip;
     geoip = mrb_define_class(mrb, "GeoIP", mrb->object_class);
-    mrb_define_method(mrb, geoip, "initialize", mrb_geoip_init, MRB_ARGS_REQ(1));
+    mrb_define_method(mrb, geoip, "initialize", mrb_geoip_init, MRB_ARGS_ARG(1, 1));
     mrb_define_method(mrb, geoip, "record_by_name", mrb_geoip_record_by_name, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, geoip, "record_by_addr", mrb_geoip_record_by_addr, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, geoip, "country_code", mrb_geoip_country_code, MRB_ARGS_NONE());
@@ -229,6 +252,7 @@ void mrb_mruby_geoip_gem_init(mrb_state *mrb)
     mrb_define_method(mrb, geoip, "region_name", mrb_geoip_region_name, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "city", mrb_geoip_city, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "postal_code", mrb_geoip_postal_code, MRB_ARGS_NONE());
+    mrb_define_method(mrb, geoip, "org", mrb_geoip_org, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "latitude", mrb_geoip_latitude, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "longitude", mrb_geoip_longitude, MRB_ARGS_NONE());
     mrb_define_method(mrb, geoip, "metro_code", mrb_geoip_metro_code, MRB_ARGS_NONE());

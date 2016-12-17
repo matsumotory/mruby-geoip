@@ -1,0 +1,8 @@
+*.csv
+*.dat
+*.mmdb
+*.gz
+*.zip
+geoip-api-c
+mruby
+.rake_tasks
