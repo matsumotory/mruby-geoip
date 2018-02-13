@@ -44,6 +44,8 @@ static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
     GeoIPRecord_delete(data->gir);
   if (data->gi != NULL)
     GeoIP_delete(data->gi);
+  if (data->isp_gi != NULL)
+    GeoIP_delete(data->isp_gi);
 
   mrb_free(mrb, data);
 
