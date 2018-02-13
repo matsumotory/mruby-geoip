@@ -2,11 +2,11 @@
 ## GeoIP Test
 ##
 
-GeoIPdat = '/usr/local/share/GeoLiteCity.dat'
+GeoIPdat = './build/GeoLiteCity.dat'
 GeoIPhost = '216.58.200.196'
 
 # from: https://github.com/maxmind/geoip-api-php/blob/master/tests/data/GeoIPOrg.dat
-GeoIPIspdat = '/usr/local/share/GeoIPOrg.dat'
+GeoIPIspdat = './build/GeoLiteIPOrg.dat'
 
 assert("GeoIP#new") do
   geoip = GeoIP.new GeoIPdat

@@ -7,6 +7,7 @@
 */
 
 #include "mruby.h"
+#include "mruby/class.h"
 #include "mruby/data.h"
 #include "mrb_geoip.h"
 #include <GeoIP.h>
@@ -31,20 +32,22 @@ static void mrb_geoip_free(mrb_state *mrb, void *p)
 {
   mrb_geoip_data *data = p;
 
-  GeoIPRecord_delete(data->gir);
-  GeoIP_delete(data->gi);
-}
-
-static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
-{
-  mrb_geoip_data *data = (mrb_geoip_data *)DATA_PTR(self);
+  if (!p) { return; }
 
   if (data->gir != NULL)
     GeoIPRecord_delete(data->gir);
   if (data->gi != NULL)
     GeoIP_delete(data->gi);
+  if (data->isp_gi != NULL)
+    GeoIP_delete(data->isp_gi);
 
   mrb_free(mrb, data);
+}
+
+static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
+{
+  mrb_geoip_free(mrb, DATA_PTR(self));
+  DATA_PTR(self) = NULL;
 
   return mrb_nil_value();
 }
@@ -69,8 +72,10 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
 
   argc = mrb_get_args(mrb, "z|z", &city_db, &isp_db);
   data = (mrb_geoip_data *)mrb_malloc(mrb, sizeof(mrb_geoip_data));
+  DATA_PTR(self) = data;
   data->city_db = city_db;
   data->host = NULL;
+  data->isp_gi = NULL;
 
   data->gi = GeoIP_open(city_db, GEOIP_INDEX_CACHE);
   if (data->gi == NULL) {
@@ -85,7 +90,6 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
   }
 
   data->gir = NULL;
-  DATA_PTR(self) = data;
 
   return self;
 }
@@ -184,8 +188,10 @@ static mrb_value mrb_geoip_postal_code(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_geoip_org(mrb_state *mrb, mrb_value self)
 {
   mrb_geoip_data *data = DATA_PTR(self);
-  return mrb_str_new_cstr(mrb, MK_STR(data->org_function(
-          data->isp_gi, data->host)));
+  char *str = data->org_function(data->isp_gi, data->host);
+  mrb_value ret = mrb_str_new_cstr(mrb, MK_STR(str));
+  free(str);
+  return ret;
 
 }
 
@@ -244,6 +250,7 @@ void mrb_mruby_geoip_gem_init(mrb_state *mrb)
 {
     struct RClass *geoip;
     geoip = mrb_define_class(mrb, "GeoIP", mrb->object_class);
+    MRB_SET_INSTANCE_TT(geoip, MRB_TT_DATA);
     mrb_define_method(mrb, geoip, "initialize", mrb_geoip_init, MRB_ARGS_ARG(1, 1));
     mrb_define_method(mrb, geoip, "record_by_name", mrb_geoip_record_by_name, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, geoip, "record_by_addr", mrb_geoip_record_by_addr, MRB_ARGS_REQ(1));
