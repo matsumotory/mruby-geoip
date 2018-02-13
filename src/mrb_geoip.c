@@ -7,6 +7,7 @@
 */
 
 #include "mruby.h"
+#include "mruby/class.h"
 #include "mruby/data.h"
 #include "mrb_geoip.h"
 #include <GeoIP.h>
@@ -246,6 +247,7 @@ void mrb_mruby_geoip_gem_init(mrb_state *mrb)
 {
     struct RClass *geoip;
     geoip = mrb_define_class(mrb, "GeoIP", mrb->object_class);
+    MRB_SET_INSTANCE_TT(geoip, MRB_TT_DATA);
     mrb_define_method(mrb, geoip, "initialize", mrb_geoip_init, MRB_ARGS_ARG(1, 1));
     mrb_define_method(mrb, geoip, "record_by_name", mrb_geoip_record_by_name, MRB_ARGS_REQ(1));
     mrb_define_method(mrb, geoip, "record_by_addr", mrb_geoip_record_by_addr, MRB_ARGS_REQ(1));
