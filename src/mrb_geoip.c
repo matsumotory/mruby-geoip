@@ -32,13 +32,7 @@ static void mrb_geoip_free(mrb_state *mrb, void *p)
 {
   mrb_geoip_data *data = p;
 
-  GeoIPRecord_delete(data->gir);
-  GeoIP_delete(data->gi);
-}
-
-static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
-{
-  mrb_geoip_data *data = (mrb_geoip_data *)DATA_PTR(self);
+  if (!p) { return; }
 
   if (data->gir != NULL)
     GeoIPRecord_delete(data->gir);
@@ -48,6 +42,12 @@ static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
     GeoIP_delete(data->isp_gi);
 
   mrb_free(mrb, data);
+}
+
+static mrb_value mrb_geoip_close(mrb_state *mrb, mrb_value self)
+{
+  mrb_geoip_free(mrb, DATA_PTR(self));
+  DATA_PTR(self) = NULL;
 
   return mrb_nil_value();
 }
@@ -72,8 +72,10 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
 
   argc = mrb_get_args(mrb, "z|z", &city_db, &isp_db);
   data = (mrb_geoip_data *)mrb_malloc(mrb, sizeof(mrb_geoip_data));
+  DATA_PTR(self) = data;
   data->city_db = city_db;
   data->host = NULL;
+  data->isp_gi = NULL;
 
   data->gi = GeoIP_open(city_db, GEOIP_INDEX_CACHE);
   if (data->gi == NULL) {
@@ -88,7 +90,6 @@ static mrb_value mrb_geoip_init(mrb_state *mrb, mrb_value self)
   }
 
   data->gir = NULL;
-  DATA_PTR(self) = data;
 
   return self;
 }
