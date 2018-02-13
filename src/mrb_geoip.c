@@ -184,8 +184,10 @@ static mrb_value mrb_geoip_postal_code(mrb_state *mrb, mrb_value self)
 static mrb_value mrb_geoip_org(mrb_state *mrb, mrb_value self)
 {
   mrb_geoip_data *data = DATA_PTR(self);
-  return mrb_str_new_cstr(mrb, MK_STR(data->org_function(
-          data->isp_gi, data->host)));
+  char *str = data->org_function(data->isp_gi, data->host);
+  mrb_value ret = mrb_str_new_cstr(mrb, MK_STR(str));
+  free(str);
+  return ret;
 
 }
 
